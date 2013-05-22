@@ -2,11 +2,12 @@
 #
 # sync music from source to destination directory
 # copy opus, ogg, mp3, as-is
-# encode flac, wav, etc. as opus
+# encode flac as opus
 
 srcpath = "/data/music"
 dstpath = "/run/media/shaurz/SANSA_SD"
 
+import sys
 import os
 import errno
 import shutil
