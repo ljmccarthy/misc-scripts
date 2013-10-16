@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Arrange all files in the current directory in to alphabetical subdirectories
+
+for letter in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
+    mkdir -p $letter
+    for file in ${letter}*.zip; do
+        mv "$file" $letter/
+    done
+done
+
+mkdir -p 0
+for file in *.zip; do
+    mv "$file" 0/
+done
