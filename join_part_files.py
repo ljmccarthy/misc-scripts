@@ -11,7 +11,7 @@ drop_dir = '/volume1/Download/NZBGet/dst'
 
 def join_part_files(dir_path):
     all_files = os.listdir(dir_path)
-    prefix = os.path.commonprefix(all_files)
+    prefix = os.path.commonprefix(all_files).rstrip('.')
     pattern = re.compile('^' + re.escape(prefix) + r'(\.[0-9]{3})?$')
     part_files = sorted(x for x in all_files if pattern.match(x))
     if len(part_files) < 2:
