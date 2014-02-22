@@ -5,6 +5,7 @@
 import sys
 import os
 import re
+import shutil
 
 drop_dir = '/volume1/Download/NZBGet/dst'
 
@@ -26,8 +27,7 @@ def join_part_files(dir_path):
             for part_name in part_files:
                 print 'Joining:', part_name
                 with open(os.path.join(dir_path, part_name), 'rb') as part:
-                    data = part.read()
-                out.write(data)
+                    shutil.copyfileobj(part, out)
     except Exception:
         try:
             os.remove(joining_path)
