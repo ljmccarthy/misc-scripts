@@ -34,12 +34,12 @@ def join_part_files(dir_path):
         except OSError:
             pass
         raise
-    os.rename(joining_path, prefix_path)
     for part_name in part_files:
         try:
             os.remove(os.path.join(dir_path, part_name))
         except OSError as e:
             print 'Error removing part file:', e
+    os.rename(joining_path, prefix_path)
     return True
 
 def join_part_files_in_dirs(dir_path):
