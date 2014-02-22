@@ -55,5 +55,5 @@ def main():
         for path in sys.argv[1:]:
             join_part_files(path)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
