@@ -13,7 +13,7 @@ def join_part_files(dir_path):
     prefix = os.path.commonprefix(all_files)
     pattern = re.compile('^' + re.escape(prefix) + r'(\.[0-9]{3})?$')
     part_files = sorted(x for x in all_files if pattern.match(x))
-    if not part_files:
+    if len(part_files) < 2:
         print 'No part files found in:', dir_path
         return False
     if prefix in part_files and prefix + '.000' in part_files:
@@ -25,14 +25,9 @@ def join_part_files(dir_path):
         with open(joining_path, 'wb') as out:
             for part_name in part_files:
                 print 'Joining:', part_name
-                part_path = os.path.join(dir_path, part_name)
-                with open(part_path, 'rb') as part:
+                with open(os.path.join(dir_path, part_name), 'rb') as part:
                     data = part.read()
                 out.write(data)
-                try:
-                    os.remove(part_path)
-                except OSError as e:
-                    print 'Error removing part file:', e
     except Exception:
         try:
             os.remove(joining_path)
@@ -40,6 +35,11 @@ def join_part_files(dir_path):
             pass
         raise
     os.rename(joining_path, prefix_path)
+    for part_name in part_files:
+        try:
+            os.remove(os.path.join(dir_path, part_name))
+        except OSError as e:
+            print 'Error removing part file:', e
     return True
 
 def join_part_files_in_dirs(dir_path):
