@@ -2,14 +2,21 @@
 #
 # Arrange all files in the current directory in to alphabetical subdirectories
 
+if [ -z $1 ]; then
+    echo "usage: alphabetize EXTENSION"
+    exit 1
+fi
+
+ext=$1
+
 for letter in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
     mkdir -p $letter
-    for file in ${letter}*.zip; do
+    for file in ${letter}*.$ext; do
         mv "$file" $letter/
     done
 done
 
 mkdir -p 0
-for file in *.zip; do
+for file in *.$ext; do
     mv "$file" 0/
 done
