@@ -1,0 +1,1 @@
+These are a bunch of unrelated personal scripts which I use in my everyday computing. They are hastily written, use hard-coded paths and may delete your files if you are silly enough to run them. Here be dragons!
