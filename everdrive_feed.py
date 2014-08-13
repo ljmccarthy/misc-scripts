@@ -37,7 +37,7 @@ feed_template = '''\
 <link href="http://iogopro.com/feeds/everdrive.xml" rel="self" />
 <link href="http://krikzz.com/" />
 <updated>{updated}</updated>
-{entries} 
+{entries}
 </feed>
 '''
 
