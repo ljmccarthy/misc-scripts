@@ -2,7 +2,7 @@
 
 import os
 
-music_dir = "/data/music"
+music_dir = "/nas/music"
 
 music_exts = [".flac"]
 
