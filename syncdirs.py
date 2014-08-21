@@ -38,6 +38,26 @@ class DirSyncFS(object):
         if not self.dryrun:
             os.remove(path)
 
+    def walk(self, path):
+        try:
+            names = os.listdir(path)
+        except EnvironmentError:
+            return
+        names.sort()
+        dirnames = []
+        filenames = []
+        for name in names:
+            if os.path.isdir(os.path.join(path, name)):
+                dirnames.append(name)
+            else:
+                filenames.append(name)
+        yield path, dirnames, filenames
+        for name in dirnames:
+            for subpath, dirnames, filenames in os.walk(os.path.join(path, name), topdown=False):
+                dirnames.sort()
+                filenames.sort()
+                yield subpath, dirnames, filenames
+
 def stat_changed(src, dst):
     # Allow 2 second error for rubbish filesystems
     # and 1 hour difference for unadjusted DST
@@ -115,14 +135,10 @@ class DirSyncer(object):
             self.srcroot, self.dstroot, " dryrun" if self.fs.dryrun else ""))
 
         try:
-            for dirpath, dirnames, filenames in os.walk(self.dstroot, topdown=False):
-                dirnames.sort()
-                filenames.sort()
+            for dirpath, dirnames, filenames in self.fs.walk(self.dstroot):
                 self.visit_cleanup(dirpath, dirnames + filenames)
 
-            for dirpath, dirnames, filenames in os.walk(self.srcroot, topdown=False):
-                dirnames.sort()
-                filenames.sort()
+            for dirpath, dirnames, filenames in self.fs.walk(self.srcroot):
                 self.visit_copy(dirpath, dirnames + filenames)
         except:
             print(traceback.format_exc())
