@@ -4,7 +4,7 @@
 # copy opus, ogg, mp3, as-is
 # encode flac as opus
 
-srcpath = "/data/music"
+srcpath = "/nas/music"
 dstpath = "/run/media/shaurz/SANSA_SD"
 
 import sys
@@ -92,7 +92,7 @@ music_extensions = ("flac", "opus", "ogg", "mp3")
 
 invalid_chars_re = re.compile(r'["*:<>?\[\]|]')
 
-def sync_music(srcpath, dstpath):
+def sync_music(srcpath, dstpath, encoder, extension):
     srcfiles = list(find_files_by_extension(srcpath, music_extensions))
     srcfiles = find_preferred_files(srcfiles, music_extensions)
     for filename in srcfiles:
@@ -102,12 +102,11 @@ def sync_music(srcpath, dstpath):
         make_path(os.path.dirname(dstfile))
         try:
             if split_ext(filename)[1] == "flac":
-                dstfile = os.path.splitext(dstfile)[0] + ".opus"
+                dstfile = os.path.splitext(dstfile)[0] + extension
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
-                    print("Encoding:", dstfile)
-                    rc = opusenc(srcfile, dstfile)
+                    rc = encoder(srcfile, dstfile)
                     if rc != 0:
-                        print("Error: opusenc return error code {0}".format(rc))
+                        print("Error: encoder return error code {0}".format(rc))
                         remove(dstfile)
             else:
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
@@ -121,8 +120,14 @@ def sync_music(srcpath, dstpath):
             remove(dstfile)
             raise
 
+def sync_music_opus(srcpath, dstpath):
+    sync_music(srcpath, dstpath, encoder=opusenc, extension=".opus")
+
+def sync_music_vorbis(srcpath, dstpath):
+    sync_music(srcpath, dstpath, encoder=oggenc, extension=".ogg")
+
 if __name__ == "__main__":
     try:
-        sync_music(srcpath, dstpath)
+        sync_music_opus(srcpath, dstpath)
     except KeyboardInterrupt:
         pass
