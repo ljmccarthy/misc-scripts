@@ -30,6 +30,7 @@ def flatten(xxs):
     return [x for xs in xxs for x in xs]
 
 def opusenc(input_file, output_file):
+    print("Encoding: {0}\n" .format(os.path.basename(output_file)))
     tags = flatten(("--comment", "{0}={1}".format(tag, value)) for tag, value in get_flac_tags(input_file))
     p = subprocess.Popen(
         ["flac", "--decode", "--stdout", input_file], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
