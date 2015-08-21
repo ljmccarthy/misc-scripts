@@ -107,9 +107,9 @@ music_extensions = ("flac", "opus", "ogg", "mp3")
 def sync_music(srcpath, dstpath, encoder, extension):
     srcfiles = list(find_files_by_extension(srcpath, music_extensions))
     srcfiles = find_preferred_files(srcfiles, music_extensions)
-    dstfiles = find_files(dstpath)
+    dstfiles = frozenset(find_files(dstpath))
 
-    files_to_delete = sorted(frozenset(dstfiles) - frozenset(replace_invalid_chars(replace_extension(x, "flac", extension)) for x in srcfiles))
+    files_to_delete = sorted(dstfiles - frozenset(replace_invalid_chars(replace_extension(x, "flac", extension)) for x in srcfiles))
     for filename in files_to_delete:
         filename = os.path.join(dstpath, filename)
         print("Removing:", filename)
