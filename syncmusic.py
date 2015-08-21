@@ -30,7 +30,7 @@ def flatten(xxs):
     return [x for xs in xxs for x in xs]
 
 def opusenc(input_file, output_file):
-    print("Encoding: {0}\n" .format(os.path.basename(output_file)))
+    print("Encoding: {0}\n" .format(output_file))
     tags = flatten(("--comment", "{0}={1}".format(tag, value)) for tag, value in get_flac_tags(input_file))
     p = subprocess.Popen(
         ["flac", "--decode", "--stdout", input_file], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -68,16 +68,20 @@ def remove(path):
     except Exception:
         pass
 
-def find_files_by_extension(path, extensions):
+def find_files(path):
     for dirpath, dirnames, filenames in os.walk(path):
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
-            ext = split_ext(filename)[1]
-            if ext in extensions:
-                filepath = os.path.join(dirpath, filename)
-                relpath = os.path.relpath(filepath, path)
-                yield relpath
+            filepath = os.path.join(dirpath, filename)
+            relpath = os.path.relpath(filepath, path)
+            yield relpath
+
+def find_files_by_extension(path, extensions):
+    for filename in find_files(path):
+        ext = split_ext(filename)[1]
+        if ext in extensions:
+            yield filename
 
 def find_preferred_files(filenames, extensions):
     ext_priority = {ext: i for i, ext in enumerate(extensions)}
@@ -89,21 +93,35 @@ def find_preferred_files(filenames, extensions):
             preferred[basename] = filename
     return sorted(preferred.values())
 
-music_extensions = ("flac", "opus", "ogg", "mp3")
+def replace_extension(filename, ext_from, ext_to):
+    name, ext = split_ext(filename)
+    return name + "." + ext_to if ext == ext_from else filename
 
 invalid_chars_re = re.compile(r'["*:<>?\[\]|]')
+
+def replace_invalid_chars(filename):
+    return os.path.sep.join(invalid_chars_re.sub("_", part.rstrip(".")) for part in filename.split(os.path.sep))
+
+music_extensions = ("flac", "opus", "ogg", "mp3")
 
 def sync_music(srcpath, dstpath, encoder, extension):
     srcfiles = list(find_files_by_extension(srcpath, music_extensions))
     srcfiles = find_preferred_files(srcfiles, music_extensions)
+    dstfiles = find_files(dstpath)
+
+    files_to_delete = sorted(frozenset(dstfiles) - frozenset(replace_invalid_chars(replace_extension(x, "flac", extension)) for x in srcfiles))
+    for filename in files_to_delete:
+        filename = os.path.join(dstpath, filename)
+        print("Removing:", filename)
+        remove(filename)
+
     for filename in srcfiles:
         srcfile = os.path.join(srcpath, filename)
-        dstfile = os.path.sep.join(invalid_chars_re.sub("_", part.rstrip(".")) for part in filename.split(os.path.sep))
-        dstfile = os.path.join(dstpath, dstfile)
+        dstfile = os.path.join(dstpath, replace_invalid_chars(filename))
         make_path(os.path.dirname(dstfile))
         try:
             if split_ext(filename)[1] == "flac":
-                dstfile = os.path.splitext(dstfile)[0] + extension
+                dstfile = os.path.splitext(dstfile)[0] + "." + extension
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
                     rc = encoder(srcfile, dstfile)
                     if rc != 0:
@@ -122,10 +140,10 @@ def sync_music(srcpath, dstpath, encoder, extension):
             raise
 
 def sync_music_opus(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=opusenc, extension=".opus")
+    sync_music(srcpath, dstpath, encoder=opusenc, extension="opus")
 
 def sync_music_vorbis(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=oggenc, extension=".ogg")
+    sync_music(srcpath, dstpath, encoder=oggenc, extension="ogg")
 
 if __name__ == "__main__":
     try:
