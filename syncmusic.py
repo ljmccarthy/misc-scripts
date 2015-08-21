@@ -95,7 +95,7 @@ def find_preferred_files(filenames, extensions):
 
 def replace_extension(filename, ext_from, ext_to):
     name, ext = split_ext(filename)
-    return name + "." + ext_to if ext == ext_from else filename
+    return name + os.path.extsep + ext_to if ext == ext_from else filename
 
 invalid_chars_re = re.compile(r'["*:<>?\[\]|]')
 
@@ -121,7 +121,7 @@ def sync_music(srcpath, dstpath, encoder, extension):
         make_path(os.path.dirname(dstfile))
         try:
             if split_ext(filename)[1] == "flac":
-                dstfile = os.path.splitext(dstfile)[0] + "." + extension
+                dstfile = os.path.splitext(dstfile)[0] + os.path.extsep + extension
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
                     rc = encoder(srcfile, dstfile)
                     if rc != 0:
