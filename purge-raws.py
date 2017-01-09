@@ -14,3 +14,4 @@ for dirpath, dirnamess, filenames in os.walk(PHOTOS_ROOT):
                 raw_path = os.path.join(dirpath, raw_filename)
                 if os.path.exists(raw_path):
                     print('Deleting {0}'.format(raw_path))
+                    os.remove(raw_path)
