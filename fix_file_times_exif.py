@@ -1,5 +1,5 @@
 # Script to fix file modified datetimes of JPEG images using EXIF data.
-# Requires pytz and exifread (pip install exifread).
+# Requires pytz and exifread (pip install pytz exifread).
 #
 # Luke McCarthy 2017-01-09
 
