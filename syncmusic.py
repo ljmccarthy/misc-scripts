@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # sync music from source to destination directory
 # copy opus, ogg, mp3, as-is
 # encode flac as opus
