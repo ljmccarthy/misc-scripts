@@ -4,9 +4,6 @@
 # copy opus, ogg, mp3, as-is
 # encode flac as opus
 
-srcpath = "/nas/music"
-dstpath = "/run/media/shaurz/SANSA_SD"
-
 import sys
 import os
 import errno
@@ -23,18 +20,38 @@ def get_flac_tags(filename):
     for line in output.decode("utf-8").split("\n"):
         tag = line.split("=", 1)
         if len(tag) == 2:
-            tags.append(tag)
+            tags.append((tag[0].upper(), tag[1]))
     return tags
 
 def flatten(xxs):
     return [x for xs in xxs for x in xs]
 
 def opusenc(input_file, output_file):
-    print("Encoding: {0}\n" .format(output_file))
+    print("Encoding: {0}" .format(output_file))
     tags = flatten(("--comment", "{0}={1}".format(tag, value)) for tag, value in get_flac_tags(input_file))
     p = subprocess.Popen(
-        ["flac", "--decode", "--stdout", input_file], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        ["flac", "--decode", "--stdout", input_file],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     return subprocess.call(["opusenc"] + tags + ["-", output_file], stdin=p.stdout)
+
+def aacenc(input_file, output_file):
+    print("Encoding: {0}" .format(output_file))
+    tags = dict(get_flac_tags(input_file))
+    p = subprocess.Popen(
+        ["flac", "--decode", "--stdout", input_file],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    return subprocess.call([
+        "fdkaac",
+        "--title", tags.get("TITLE", ""),
+        "--artist", tags.get("ARTIST", ""),
+        "--album", tags.get("ALBUM", ""),
+        "--track", tags.get("TRACKNUMBER", ""),
+        "--disk", tags.get("DISCNUMBER", ""),
+        "--genre", tags.get("GENRE", ""),
+        "--date", tags.get("DATE", ""),
+        "--bitrate", "128",
+        "-o", output_file, "-"],
+        stdin=p.stdout)
 
 def file_newer(src, dst):
     return (os.stat(src).st_mtime - os.stat(dst).st_mtime) > 1.0
@@ -102,7 +119,7 @@ invalid_chars_re = re.compile(r'["*:<>?\[\]|]')
 def replace_invalid_chars(filename):
     return os.path.sep.join(invalid_chars_re.sub("_", part.rstrip(".")) for part in filename.split(os.path.sep))
 
-music_extensions = ("flac", "opus", "ogg", "mp3")
+music_extensions = ("flac", "m4a", "aac", "opus", "ogg", "mp3")
 
 def sync_music(srcpath, dstpath, encoder, extension):
     srcfiles = list(find_files_by_extension(srcpath, music_extensions))
@@ -145,8 +162,11 @@ def sync_music_opus(srcpath, dstpath):
 def sync_music_vorbis(srcpath, dstpath):
     sync_music(srcpath, dstpath, encoder=oggenc, extension="ogg")
 
-if __name__ == "__main__":
-    try:
-        sync_music_opus(srcpath, dstpath)
-    except KeyboardInterrupt:
-        pass
+def sync_music_aac(srcpath, dstpath):
+    sync_music(srcpath, dstpath, encoder=aacenc, extension="aac")
+
+__all__ = [
+    "sync_music_opus",
+    "sync_music_vorbis",
+    "sync_music_aac",
+]
