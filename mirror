@@ -1,0 +1,14 @@
+#!/bin/sh
+USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
+exec wget \
+  --mirror \
+  --convert-links \
+  --adjust-extension \
+  --page-requisites \
+  --no-parent \
+  --execute robots=off \
+  --wait=2 --random-wait \
+  --limit-rate=100k \
+  --user-agent="${USER_AGENT}" \
+  --exclude-directories="/forum" \
+  "$@"
