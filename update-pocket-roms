@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+# Update ROMs for Analogue Pocket SD Card from Myrient No-Intro
+#
+
+set -euo pipefail
+
+POCKET_ROOT=/run/media/ljmcc/Pocket
+MYRIENT_ROOT=/mnt/data4/Myrient
+
+sync_rom_dir() {
+	local src="$1"
+	local dst="$2"
+	for number in 0 1 2 3 4 5 6 7 8 9; do
+		if [ "$(echo "${src}/${number}"*.zip)" != "${src}/${number}*.zip" ]; then
+			mkdir -p "${dst}/0"
+			pushd "${dst}/0" >/dev/null
+			for rom in "${src}/${number}"*.zip; do
+				romname="${rom##*/}"
+				echo "$romname"
+				unzip -uojq "$rom" 
+			done
+			popd >/dev/null
+		fi
+	done
+	for letter in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z; do
+		if [ "$(echo "${src}/${letter}"*.zip)" != "${src}/${letter}*.zip" ]; then
+			mkdir -p "${dst}/${letter}"
+			pushd "${dst}/${letter}" >/dev/null
+			for rom in "${src}/${letter}"*.zip; do
+				romname="${rom##*/}"
+				echo "$romname"
+				unzip -uojq "$rom" 
+			done
+			popd >/dev/null
+		fi
+		if [ "$(echo "${src}/${letter,,}"*.zip)" != "${src}/${letter,,}*.zip" ]; then
+			mkdir -p "${dst}/${letter}"
+			pushd "${dst}/${letter}" >/dev/null
+			for rom in "${src}/${letter,,}"*.zip; do
+				romname="${rom##*/}"
+				echo "$romname"
+				unzip -uojq "$rom" 
+			done
+			popd >/dev/null
+		fi
+	done
+}
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Atari - 2600" \
+	"${POCKET_ROOT}/Assets/2600/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Atari - 7800" \
+	"${POCKET_ROOT}/Assets/7800/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Coleco - ColecoVision" \
+	"${POCKET_ROOT}/Assets/coleco/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Mattel - Intellivision" \
+	"${POCKET_ROOT}/Assets/intv/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/NEC - PC Engine - TurboGrafx-16" \
+	"${POCKET_ROOT}/Assets/pce/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Nintendo - Nintendo Entertainment System (Headered)" \
+	"${POCKET_ROOT}/Assets/nes/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Nintendo - Super Nintendo Entertainment System" \
+	"${POCKET_ROOT}/Assets/snes/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Sega - Master System - Mark III" \
+	"${POCKET_ROOT}/Assets/sms/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Sega - Mega Drive - Genesis" \
+	"${POCKET_ROOT}/Assets/genesis/common"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Sega - SG-1000" \
+	"${POCKET_ROOT}/Assets/sg1000/common"
