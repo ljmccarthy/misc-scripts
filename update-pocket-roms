@@ -49,40 +49,40 @@ sync_rom_dir() {
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Atari - 2600" \
-	"${POCKET_ROOT}/Assets/2600/common"
+	"${POCKET_ROOT}/Assets/2600/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Atari - 7800" \
-	"${POCKET_ROOT}/Assets/7800/common"
+	"${POCKET_ROOT}/Assets/7800/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Coleco - ColecoVision" \
-	"${POCKET_ROOT}/Assets/coleco/common"
+	"${POCKET_ROOT}/Assets/coleco/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Mattel - Intellivision" \
-	"${POCKET_ROOT}/Assets/intv/common"
+	"${POCKET_ROOT}/Assets/intv/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/NEC - PC Engine - TurboGrafx-16" \
-	"${POCKET_ROOT}/Assets/pce/common"
+	"${POCKET_ROOT}/Assets/pce/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Nintendo - Nintendo Entertainment System (Headered)" \
-	"${POCKET_ROOT}/Assets/nes/common"
+	"${POCKET_ROOT}/Assets/nes/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Nintendo - Super Nintendo Entertainment System" \
-	"${POCKET_ROOT}/Assets/snes/common"
+	"${POCKET_ROOT}/Assets/snes/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Sega - Master System - Mark III" \
-	"${POCKET_ROOT}/Assets/sms/common"
+	"${POCKET_ROOT}/Assets/sms/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Sega - Mega Drive - Genesis" \
-	"${POCKET_ROOT}/Assets/genesis/common"
+	"${POCKET_ROOT}/Assets/genesis/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Sega - SG-1000" \
-	"${POCKET_ROOT}/Assets/sg1000/common"
+	"${POCKET_ROOT}/Assets/sg1000/common/roms"
