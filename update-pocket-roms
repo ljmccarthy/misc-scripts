@@ -48,6 +48,10 @@ sync_rom_dir() {
 }
 
 sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Arduboy Inc - Arduboy" \
+	"${POCKET_ROOT}/Assets/arduboy/common/roms"
+
+sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Atari - 2600" \
 	"${POCKET_ROOT}/Assets/2600/common/roms"
 
@@ -56,8 +60,36 @@ sync_rom_dir \
 	"${POCKET_ROOT}/Assets/7800/common/roms"
 
 sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Bandai - WonderSwan" \
+	"${POCKET_ROOT}/Assets/wonderswan/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Bandai - WonderSwan Color" \
+	"${POCKET_ROOT}/Assets/wonderswan/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Bit Corporation - Gamate" \
+	"${POCKET_ROOT}/Assets/gamate/common/roms"
+
+sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Coleco - ColecoVision" \
 	"${POCKET_ROOT}/Assets/coleco/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Emerson - Arcadia 2001" \
+	"${POCKET_ROOT}/Assets/arcadia/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Entex - Adventure Vision" \
+	"${POCKET_ROOT}/Assets/avision/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Fairchild - Channel F" \
+	"${POCKET_ROOT}/Assets/channel_f/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Magnavox - Odyssey 2" \
+	"${POCKET_ROOT}/Assets/odyssey2/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Mattel - Intellivision" \
@@ -68,12 +100,32 @@ sync_rom_dir \
 	"${POCKET_ROOT}/Assets/pce/common/roms"
 
 sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Nintendo - Game Boy" \
+	"${POCKET_ROOT}/Assets/gb/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Nintendo - Game Boy Advance" \
+	"${POCKET_ROOT}/Assets/gba/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Nintendo - Game Boy Color" \
+	"${POCKET_ROOT}/Assets/gbc/common/roms"
+
+sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Nintendo - Nintendo Entertainment System (Headered)" \
 	"${POCKET_ROOT}/Assets/nes/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Nintendo - Super Nintendo Entertainment System" \
 	"${POCKET_ROOT}/Assets/snes/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/RCA - Studio II" \
+	"${POCKET_ROOT}/Assets/studio2/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Sega - Game Gear" \
+	"${POCKET_ROOT}/Assets/gg/common/roms"
 
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Sega - Master System - Mark III" \
@@ -86,3 +138,15 @@ sync_rom_dir \
 sync_rom_dir \
 	"${MYRIENT_ROOT}/No-Intro/Sega - SG-1000" \
 	"${POCKET_ROOT}/Assets/sg1000/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/VTech - CreatiVision" \
+	"${POCKET_ROOT}/Assets/creativision/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Watara - Supervision" \
+	"${POCKET_ROOT}/Assets/supervision/common/roms"
+
+sync_rom_dir \
+	"${MYRIENT_ROOT}/No-Intro/Welback - Mega Duck" \
+	"${POCKET_ROOT}/Assets/mega_duck/common/roms"
