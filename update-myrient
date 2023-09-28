@@ -1,0 +1,30 @@
+#!/bin/sh
+exec rsync -a --progress --bwlimit=10M \
+	--exclude 'No-Intro/*(CDN)*' \
+	--exclude 'No-Intro/*(Encrypted)*' \
+	--exclude 'No-Intro/*(Headerless)*' \
+	--exclude 'No-Intro/*(Hentai)*' \
+	--exclude 'No-Intro/*(Development Kit Hard Drives)*' \
+	--exclude 'No-Intro/Audio CD' \
+	--exclude 'No-Intro/CD-ROM' \
+	--exclude 'No-Intro/DVD-ROM' \
+	--exclude 'No-Intro/DVD-Video' \
+	--exclude 'No-Intro/HD DVD' \
+	--exclude 'No-Intro/IBM - PC and Compatibles*' \
+	--exclude 'No-Intro/Microsoft - Xbox 360*' \
+	--exclude 'No-Intro/Nintendo - Kiosk Video Compact Flash*' \
+	--exclude 'No-Intro/Nintendo - Misc' \
+	--exclude 'No-Intro/Nintendo - Nintendo GameCube (NPDP Carts)' \
+	--exclude 'No-Intro/Nintendo - SDKs' \
+	--exclude 'No-Intro/Sony - PlayStation 3*' \
+	--exclude 'No-Intro/Sony - *(PSN)*' \
+	--exclude 'No-Intro/Non-Game - *' \
+	--exclude 'No-Intro/Non-Redump - *' \
+	--exclude 'No-Intro/Source Code - *' \
+	--exclude 'No-Intro/Unofficial - *' \
+	--exclude 'No-Intro/Video CD' \
+	--exclude 'Miscellaneous' \
+	--exclude 'Redump' \
+	--exclude 'TOSEC*' \
+	rsync://rsync.myrient.erista.me/files \
+	/mnt/data4/Myrient/
