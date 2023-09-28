@@ -1,0 +1,12 @@
+#!/bin/sh
+
+download_videos() {
+	yt-dlp --download-archive archive -ciw -o "%(upload_date)s %(id)s %(title)s.%(ext)s" -v "$@"
+}
+
+find . -type d | while read dir; do
+	if [ -f "$dir/url" ]; then
+		(cd "$dir" && download_videos "$(cat url)")
+	fi
+done
+exit 0
