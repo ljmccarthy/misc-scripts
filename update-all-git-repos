@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Update all git repos recursively from the current directory
+#
+find . -type d -name .git | while read dotgitdir; do
+	dir="$(dirname "$dotgitdir")"
+	echo "Updating $dir"
+	pushd "$dir" >/dev/null
+	git pull --rebase
+	git submodule update --recursive
+	popd >/dev/null
+done
