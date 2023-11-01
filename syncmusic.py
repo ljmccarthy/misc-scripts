@@ -140,7 +140,7 @@ def sync_music(srcpath, dstpath, encoder, extension):
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
                     rc = encoder(srcfile, dstfile)
                     if rc != 0:
-                        print("Error: encoder return error code {0}".format(rc))
+                        print("Error: encoder return error code {0} for file: {1}".format(rc, srcfile))
                         remove(dstfile)
             else:
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
