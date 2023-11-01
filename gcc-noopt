@@ -1,0 +1,3 @@
+#!/bin/sh
+GCC_O0_OPTS_DISABLED=$(gcc -Q -O0 --help=optimizers | awk -v ORS=" " '($1 ~ /^-f/) && ($2 ~ /enabled/) {print "-fno-" substr($1,3)}')
+exec gcc -O0 $GCC_O0_OPTS_DISABLED "$@"
