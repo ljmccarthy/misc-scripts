@@ -1,0 +1,4 @@
+#!/bin/sh
+
+sncli sync
+rsync -av --delete --exclude=sncli.log $HOME/.sncli/ /mnt/data1/ljmcc/Backups/Simplenote/
