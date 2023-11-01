@@ -1,14 +1,26 @@
 #!/bin/sh
-USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0"
-exec wget \
+
+MIRROR_DIR="/mnt/data2/www/mirror.xordust.com"
+
+FIREFOX_UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0"
+CHROME_UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+
+if [ "-z" "${USER_AGENT+x}" ]; then
+	USER_AGENT="${CHROME_UA}"
+fi
+
+cd "$MIRROR_DIR" && exec wget \
   --mirror \
   --convert-links \
-  --adjust-extension \
   --page-requisites \
   --no-parent \
+  --adjust-extension \
   --execute robots=off \
   --wait=2 --random-wait \
-  --limit-rate=100k \
+  --limit-rate=500k \
+  --tries=3 \
+  --timeout=60 \
   --user-agent="${USER_AGENT}" \
   --exclude-directories="/forum" \
+  --exclude-directories="/cgi-bin" \
   "$@"
