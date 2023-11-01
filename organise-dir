@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Organise files in to subdirectories based on file type extension
+#
+# Luke McCarthy 2023-11-01
+
+set -euo pipefail
+shopt -s nullglob
+
+if [ $# -ne 1 ]; then
+	echo "usage: $0 DIR"
+	exit 1
+fi
+
+mvbytype() {
+	if [ -n "$(eval echo "*.{$2}")" ]; then
+		echo "- $1"
+		mkdir -p "$1"
+		eval mv -nv -t "\$1" "*.{$2}"
+	fi
+}
+
+DIR="$1"
+echo "Organising ${DIR}"
+cd "$DIR"
+mvbytype Archives 7z,bz2,gz,rar,tar,tbz2,tgz,txz,xz,zip
+mvbytype Audio aac,aiff,alac,ape,flac,m4a,mp3,ogg,opus,wav,wma,wv
+mvbytype Documents doc,docx,pdf,ps,txt
+mvbytype Pictures avif,bmp,gif,ico,jpeg,jpg,jxl,pbm,pgm,png,pnm,ppm,tif,tiff,xcf,webp
+mvbytype Videos avi,mkv,mov,mp4,webm,wmv
