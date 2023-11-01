@@ -3,9 +3,9 @@
 #
 # Luke McCarthy 2017-01-09
 
-PHOTOS_DIR = '/data/drive/photos'
 TIME_ZONE = 'Europe/London'
 
+import sys
 import exifread
 import os
 import pytz
@@ -37,7 +37,7 @@ def set_file_time_from_exif(filename, tzinfo=timezone.utc):
         file_timestamp = os.stat(filename).st_mtime
         exif_timestamp = dt.timestamp()
         if exif_timestamp != file_timestamp:
-            print('setting modified time {} for {}'.format(dt.isoformat(), filename))
+            print('setting modified time {} -> {} for {}'.format(datetime.fromtimestamp(file_timestamp).isoformat(), dt.isoformat(), filename))
             os.utime(filename, (exif_timestamp, exif_timestamp))
 
 def fix_file_times_exif(rootdir, timezone=TIME_ZONE):
@@ -48,4 +48,4 @@ def fix_file_times_exif(rootdir, timezone=TIME_ZONE):
                 set_file_time_from_exif(os.path.join(dirpath, filename), tzinfo)
 
 if __name__ == '__main__':
-    fix_file_times_exif(PHOTOS_DIR)
+    fix_file_times_exif(sys.argv[1])
