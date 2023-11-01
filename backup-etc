@@ -1,0 +1,2 @@
+#!/bin/sh
+exec sudo tar -cvpzf "/mnt/data2/backup/etc-$(date +%Y-%m-%d).tgz" /etc
