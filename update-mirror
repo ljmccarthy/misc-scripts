@@ -10,8 +10,9 @@ if [ -z "${USER_AGENT+x}" ]; then
 fi
 
 exec wget \
-  --directory-prefix="$MIRROR_DIR" \
-  --mirror \
+  --directory-prefix="${MIRROR_DIR}" \
+  --recursive \
+  --timestamping \
   --convert-links \
   --page-requisites \
   --no-parent \
