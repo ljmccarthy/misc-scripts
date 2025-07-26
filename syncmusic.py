@@ -1,15 +1,20 @@
+#!/usr/bin/env python3
+#
 # sync music from source to destination directory
 # copy opus, ogg, mp3, as-is
 # encode flac as opus
 
-import sys
-import os
+import argparse
 import errno
+import os
+import re
 import shutil
 import subprocess
-import re
+import sys
+from dataclasses import dataclass
+from typing import Callable
 
-def oggenc(input_file, output_file):
+def encode_ogg(input_file, output_file):
     return subprocess.call(["oggenc", "-o", output_file, input_file])
 
 def get_flac_tags(filename):
@@ -24,15 +29,10 @@ def get_flac_tags(filename):
 def flatten(xxs):
     return [x for xs in xxs for x in xs]
 
-def opusenc(input_file, output_file):
-    print("Encoding: {0}" .format(output_file))
-    tags = flatten(("--comment", "{0}={1}".format(tag, value)) for tag, value in get_flac_tags(input_file))
-    p = subprocess.Popen(
-        ["flac", "--decode", "--stdout", input_file],
-        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    return subprocess.call(["opusenc"] + tags + ["-", output_file], stdin=p.stdout)
+def encode_opus(input_file, output_file):
+    return subprocess.call(["opusenc", input_file, output_file])
 
-def aacenc(input_file, output_file):
+def encode_aac(input_file, output_file):
     print("Encoding: {0}" .format(output_file))
     tags = dict(get_flac_tags(input_file))
     p = subprocess.Popen(
@@ -51,31 +51,23 @@ def aacenc(input_file, output_file):
         "-o", output_file, "-"],
         stdin=p.stdout)
 
+@dataclass
+class Encoder:
+    extension: str
+    encode: Callable[[str, str], int]
+
+encoders = {
+    "opus": Encoder(extension="opus", encode=encode_opus),
+    "ogg": Encoder(extension="ogg", encode=encode_ogg),
+    "aac": Encoder(extension="aac", encode=encode_aac),
+}
+
 def file_newer(src, dst):
     return (os.stat(src).st_mtime - os.stat(dst).st_mtime) > 1.0
 
 def split_ext(filename):
     basename, ext = os.path.splitext(filename)
     return basename, ext[1:].lower()
-
-def make_path(path):
-    dirpath = path
-    parts = []
-    while dirpath != os.path.dirname(dirpath):
-        try:
-            os.mkdir(dirpath)
-            break
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                break
-            elif e.errno == errno.ENOENT or (sys.platform == "win32" and e.winerror == 3):
-                parts.append(os.path.basename(dirpath))
-                dirpath = os.path.dirname(dirpath)
-            else:
-                raise
-    for part in reversed(parts):
-        dirpath = os.path.join(dirpath, part)
-        os.mkdir(dirpath)
 
 def remove(path):
     try:
@@ -108,23 +100,24 @@ def find_preferred_files(filenames, extensions):
             preferred[basename] = filename
     return sorted(preferred.values())
 
-def replace_extension(filename, ext_from, ext_to):
+def replace_extension(filename, exts_from, ext_to):
     name, ext = split_ext(filename)
-    return name + os.path.extsep + ext_to if ext == ext_from else filename
+    return name + os.path.extsep + ext_to if ext in exts_from else filename
 
 invalid_chars_re = re.compile(r'["*:<>?\[\]|]')
 
 def replace_invalid_chars(filename):
     return os.path.sep.join(invalid_chars_re.sub("_", part.rstrip(".")) for part in filename.split(os.path.sep))
 
-music_extensions = ("flac", "wav", "m4a", "aac", "opus", "ogg", "mp3")
+default_dst_extensions = ("flac", "wav", "m4a", "aac", "opus", "ogg", "mp3")
+lossless_extensions = ("flac", "wav")
 
-def sync_music(srcpath, dstpath, encoder, extension):
-    srcfiles = list(find_files_by_extension(srcpath, music_extensions))
-    srcfiles = find_preferred_files(srcfiles, music_extensions)
+def sync_music(srcpath, dstpath, encoder, dst_extensions=default_dst_extensions):
+    srcfiles = list(find_files_by_extension(srcpath, dst_extensions))
+    srcfiles = find_preferred_files(srcfiles, dst_extensions)
     dstfiles = frozenset(find_files(dstpath))
 
-    files_to_delete = sorted(dstfiles - frozenset(replace_invalid_chars(replace_extension(x, "flac", extension)) for x in srcfiles))
+    files_to_delete = sorted(dstfiles - frozenset(replace_invalid_chars(replace_extension(x, lossless_extensions, encoder.extension)) for x in srcfiles))
     for filename in files_to_delete:
         filename = os.path.join(dstpath, filename)
         print("Removing:", filename)
@@ -133,12 +126,12 @@ def sync_music(srcpath, dstpath, encoder, extension):
     for filename in srcfiles:
         srcfile = os.path.join(srcpath, filename)
         dstfile = os.path.join(dstpath, replace_invalid_chars(filename))
-        make_path(os.path.dirname(dstfile))
+        os.makedirs(os.path.dirname(dstfile), exist_ok=True)
         try:
-            if split_ext(filename)[1] == "flac":
-                dstfile = os.path.splitext(dstfile)[0] + os.path.extsep + extension
+            if split_ext(filename)[1] in lossless_extensions:
+                dstfile = os.path.splitext(dstfile)[0] + os.path.extsep + encoder.extension
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
-                    rc = encoder(srcfile, dstfile)
+                    rc = encoder.encode(srcfile, dstfile)
                     if rc != 0:
                         print("Error: encoder return error code {0} for file: {1}".format(rc, srcfile))
                         remove(dstfile)
@@ -155,15 +148,32 @@ def sync_music(srcpath, dstpath, encoder, extension):
             raise
 
 def sync_music_opus(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=opusenc, extension="opus")
+    sync_music(srcpath, dstpath, encoder=encoders["opus"])
 
 def sync_music_vorbis(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=oggenc, extension="ogg")
+    sync_music(srcpath, dstpath, encoder=encoders["ogg"])
 
 def sync_music_aac(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=aacenc, extension="aac")
+    sync_music(srcpath, dstpath, encoder=encoders["aac"])
+
+def main():
+    valid_formats = sorted(encoders.keys())
+    argparser = argparse.ArgumentParser(description="Sync audio files from source to destination directory.")
+    argparser.add_argument("srcpath", help="Source directory containing music files.")
+    argparser.add_argument("dstpath", help="Destination directory to sync music files to.")
+    argparser.add_argument("--format", choices=valid_formats, default="opus",
+                        help="Format to encode audio files into (default: opus).")
+    args = argparser.parse_args()
+    if args.format not in encoders:
+        print("Error: Invalid format specified. Choose from: {}".format(", ".join(valid_formats)))
+        sys.exit(1)
+    sync_music(args.srcpath, args.dstpath, encoder=encoders[args.format])
+
+if __name__ == "__main__":
+    main()
 
 __all__ = [
+    "sync_music"
     "sync_music_opus",
     "sync_music_vorbis",
     "sync_music_aac",
