@@ -117,7 +117,7 @@ invalid_chars_re = re.compile(r'["*:<>?\[\]|]')
 def replace_invalid_chars(filename):
     return os.path.sep.join(invalid_chars_re.sub("_", part.rstrip(".")) for part in filename.split(os.path.sep))
 
-music_extensions = ("flac", "m4a", "aac", "opus", "ogg", "mp3")
+music_extensions = ("flac", "wav", "m4a", "aac", "opus", "ogg", "mp3")
 
 def sync_music(srcpath, dstpath, encoder, extension):
     srcfiles = list(find_files_by_extension(srcpath, music_extensions))
