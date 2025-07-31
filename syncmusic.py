@@ -77,12 +77,14 @@ def remove(path):
 
 def find_files(path):
     for dirpath, dirnames, filenames in os.walk(path):
+        dirnames[:] = [d for d in dirnames if not d.startswith('.')]
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
-            filepath = os.path.join(dirpath, filename)
-            relpath = os.path.relpath(filepath, path)
-            yield relpath
+            if not filename.startswith('.'):
+                filepath = os.path.join(dirpath, filename)
+                relpath = os.path.relpath(filepath, path)
+                yield relpath
 
 def find_files_by_extension(path, extensions):
     for filename in find_files(path):
