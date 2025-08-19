@@ -2,7 +2,7 @@
 #
 # sync music from source to destination directory
 # copy opus, ogg, mp3, as-is
-# encode flac as opus
+# encode flac, wav as opus
 
 import argparse
 import errno
@@ -14,42 +14,29 @@ import sys
 from dataclasses import dataclass
 from typing import Callable
 
-def encode_ogg(input_file, output_file):
-    return subprocess.call(["oggenc", "-o", output_file, input_file])
+default_bitrate = "128k"
 
-def get_flac_tags(filename):
-    output = subprocess.check_output(["metaflac", "--export-tags-to=-", filename])
-    tags = []
-    for line in output.decode("utf-8").split("\n"):
-        tag = line.split("=", 1)
-        if len(tag) == 2:
-            tags.append((tag[0].upper(), tag[1]))
-    return tags
+def encode_ffmpeg(input_file, output_file, codec, bitrate=default_bitrate, extra_args=[]):
+    cmd = [
+        "ffmpeg", "-y", "-i", input_file,
+        "-map", "0:a",                      # map all audio streams
+        "-map", "0:v?",                     # map video stream if exists
+        "-c:a", codec, "-b:a", bitrate,     # set audio codec and bitrate
+        "-c:v", "copy",                     # copy video stream as-is
+        "-map_metadata", "0",               # copy metadata
+    ] + extra_args + [
+        output_file
+    ]
+    return subprocess.call(cmd)
 
-def flatten(xxs):
-    return [x for xs in xxs for x in xs]
+def encode_ogg(input_file, output_file, bitrate=default_bitrate):
+    return encode_ffmpeg(input_file, output_file, codec="libvorbis", bitrate=bitrate)
 
-def encode_opus(input_file, output_file):
-    return subprocess.call(["opusenc", input_file, output_file])
+def encode_opus(input_file, output_file, bitrate=default_bitrate):
+    return encode_ffmpeg(input_file, output_file, codec="libopus", bitrate=bitrate, extra_args=["-vbr", "on"])
 
-def encode_aac(input_file, output_file):
-    print("Encoding: {0}" .format(output_file))
-    tags = dict(get_flac_tags(input_file))
-    p = subprocess.Popen(
-        ["flac", "--decode", "--stdout", input_file],
-        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    return subprocess.call([
-        "fdkaac",
-        "--title", tags.get("TITLE", ""),
-        "--artist", tags.get("ARTIST", ""),
-        "--album", tags.get("ALBUM", ""),
-        "--track", tags.get("TRACKNUMBER", ""),
-        "--disk", tags.get("DISCNUMBER", ""),
-        "--genre", tags.get("GENRE", ""),
-        "--date", tags.get("DATE", ""),
-        "--bitrate", "128",
-        "-o", output_file, "-"],
-        stdin=p.stdout)
+def encode_aac(input_file, output_file, bitrate=default_bitrate):
+    return encode_ffmpeg(input_file, output_file, codec="libfdk_aac", bitrate=bitrate)
 
 @dataclass
 class Encoder:
@@ -114,7 +101,7 @@ def replace_invalid_chars(filename):
 default_dst_extensions = ("flac", "wav", "m4a", "aac", "opus", "ogg", "mp3")
 lossless_extensions = ("flac", "wav")
 
-def sync_music(srcpath, dstpath, encoder, dst_extensions=default_dst_extensions):
+def sync_music(srcpath, dstpath, encoder, bitrate=default_bitrate, dst_extensions=default_dst_extensions):
     srcfiles = list(find_files_by_extension(srcpath, dst_extensions))
     srcfiles = find_preferred_files(srcfiles, dst_extensions)
     dstfiles = frozenset(find_files(dstpath))
@@ -133,7 +120,7 @@ def sync_music(srcpath, dstpath, encoder, dst_extensions=default_dst_extensions)
             if split_ext(filename)[1] in lossless_extensions:
                 dstfile = os.path.splitext(dstfile)[0] + os.path.extsep + encoder.extension
                 if not os.path.exists(dstfile) or file_newer(srcfile, dstfile):
-                    rc = encoder.encode(srcfile, dstfile)
+                    rc = encoder.encode(srcfile, dstfile, bitrate=bitrate)
                     if rc != 0:
                         print("Error: encoder return error code {0} for file: {1}".format(rc, srcfile))
                         remove(dstfile)
@@ -149,14 +136,14 @@ def sync_music(srcpath, dstpath, encoder, dst_extensions=default_dst_extensions)
             remove(dstfile)
             raise
 
-def sync_music_opus(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=encoders["opus"])
+def sync_music_opus(srcpath, dstpath, bitrate=default_bitrate):
+    sync_music(srcpath, dstpath, encoder=encoders["opus"], bitrate=bitrate)
 
-def sync_music_vorbis(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=encoders["ogg"])
+def sync_music_vorbis(srcpath, dstpath, bitrate=default_bitrate):
+    sync_music(srcpath, dstpath, encoder=encoders["ogg"], bitrate=bitrate)
 
-def sync_music_aac(srcpath, dstpath):
-    sync_music(srcpath, dstpath, encoder=encoders["aac"])
+def sync_music_aac(srcpath, dstpath, bitrate=default_bitrate):
+    sync_music(srcpath, dstpath, encoder=encoders["aac"], bitrate=bitrate)
 
 def main():
     valid_formats = sorted(encoders.keys())
@@ -165,11 +152,13 @@ def main():
     argparser.add_argument("dstpath", help="Destination directory to sync music files to.")
     argparser.add_argument("--format", choices=valid_formats, default="opus",
                         help="Format to encode audio files into (default: opus).")
+    argparser.add_argument("--bitrate", default=default_bitrate,
+                        help=f"Bitrate for encoding (default: {default_bitrate}).")
     args = argparser.parse_args()
     if args.format not in encoders:
         print("Error: Invalid format specified. Choose from: {}".format(", ".join(valid_formats)))
         sys.exit(1)
-    sync_music(args.srcpath, args.dstpath, encoder=encoders[args.format])
+    sync_music(args.srcpath, args.dstpath, encoder=encoders[args.format], bitrate=args.bitrate)
 
 if __name__ == "__main__":
     main()
