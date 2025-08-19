@@ -17,7 +17,8 @@ default_bitrate = "128k"
 
 def encode_ffmpeg(input_file, output_file, codec, bitrate=default_bitrate, extra_args=[]):
     cmd = [
-        "ffmpeg", "-y", "-i", input_file,
+        "ffmpeg", "-hide_banner", "-y",
+        "-i", input_file,
         "-map", "0:a",                      # map all audio streams
         "-map", "0:v?",                     # map video stream if exists
         "-c:a", codec, "-b:a", bitrate,     # set audio codec and bitrate
