@@ -13,30 +13,31 @@ import sys
 from dataclasses import dataclass
 from typing import Callable
 
-default_bitrate = "128k"
-
-def encode_ffmpeg(input_file, output_file, codec, bitrate=default_bitrate, extra_args=[]):
+def encode_ffmpeg(input_file, output_file, codec, extra_args=[]):
     cmd = [
         "ffmpeg", "-hide_banner", "-y",
         "-i", input_file,
-        "-map", "0:a",                      # map all audio streams
-        "-map", "0:v?",                     # map video stream if exists
-        "-c:a", codec, "-b:a", bitrate,     # set audio codec and bitrate
-        "-c:v", "copy",                     # copy video stream as-is
-        "-map_metadata", "0",               # copy metadata
+        "-map", "0:a",          # map all audio streams
+        "-map", "0:v?",         # map video stream if exists
+        "-map_metadata", "0",   # copy metadata
+        "-c:a", codec,          # set audio codec
+        "-c:v", "copy",         # copy video stream as-is
     ] + extra_args + [
         output_file
     ]
     return subprocess.call(cmd)
 
-def encode_ogg(input_file, output_file, bitrate=default_bitrate):
-    return encode_ffmpeg(input_file, output_file, codec="libvorbis", bitrate=bitrate)
+def encode_ogg(input_file, output_file, bitrate=None):
+    extra_args = ["-qscale:a", "5"] if bitrate is None else ["-b:a", bitrate]
+    return encode_ffmpeg(input_file, output_file, codec="libvorbis", extra_args=extra_args)
 
-def encode_opus(input_file, output_file, bitrate=default_bitrate):
-    return encode_ffmpeg(input_file, output_file, codec="libopus", bitrate=bitrate, extra_args=["-vbr", "on"])
+def encode_opus(input_file, output_file, bitrate=None):
+    extra_args = [] if bitrate is None else ["-b:a", bitrate]
+    return encode_ffmpeg(input_file, output_file, codec="libopus", extra_args=extra_args)
 
-def encode_aac(input_file, output_file, bitrate=default_bitrate):
-    return encode_ffmpeg(input_file, output_file, codec="libfdk_aac", bitrate=bitrate)
+def encode_aac(input_file, output_file, bitrate=None):
+    extra_args = ["-vbr", "4"] if bitrate is None else ["-b:a", bitrate]
+    return encode_ffmpeg(input_file, output_file, codec="libfdk_aac", extra_args=extra_args)
 
 @dataclass
 class Encoder:
@@ -101,7 +102,7 @@ def replace_invalid_chars(filename):
 default_dst_extensions = ("flac", "wav", "m4a", "aac", "opus", "ogg", "mp3")
 lossless_extensions = ("flac", "wav")
 
-def sync_music(srcpath, dstpath, encoder, bitrate=default_bitrate, dst_extensions=default_dst_extensions):
+def sync_music(srcpath, dstpath, encoder, bitrate=None, dst_extensions=default_dst_extensions):
     srcfiles = list(find_files_by_extension(srcpath, dst_extensions))
     srcfiles = find_preferred_files(srcfiles, dst_extensions)
     dstfiles = frozenset(find_files(dstpath))
@@ -136,13 +137,13 @@ def sync_music(srcpath, dstpath, encoder, bitrate=default_bitrate, dst_extension
             remove(dstfile)
             raise
 
-def sync_music_opus(srcpath, dstpath, bitrate=default_bitrate):
+def sync_music_opus(srcpath, dstpath, bitrate=None):
     sync_music(srcpath, dstpath, encoder=encoders["opus"], bitrate=bitrate)
 
-def sync_music_vorbis(srcpath, dstpath, bitrate=default_bitrate):
+def sync_music_vorbis(srcpath, dstpath, bitrate=None):
     sync_music(srcpath, dstpath, encoder=encoders["ogg"], bitrate=bitrate)
 
-def sync_music_aac(srcpath, dstpath, bitrate=default_bitrate):
+def sync_music_aac(srcpath, dstpath, bitrate=None):
     sync_music(srcpath, dstpath, encoder=encoders["aac"], bitrate=bitrate)
 
 def main():
@@ -152,8 +153,8 @@ def main():
     argparser.add_argument("dstpath", help="Destination directory to sync music files to.")
     argparser.add_argument("--format", choices=valid_formats, default="opus",
                         help="Format to encode audio files into (default: opus).")
-    argparser.add_argument("--bitrate", default=default_bitrate,
-                        help=f"Bitrate for encoding (default: {default_bitrate}).")
+    argparser.add_argument("--bitrate", default=None,
+                        help=f"Bitrate for encoding. If not specified, use default VBR settings for the format.")
     args = argparser.parse_args()
     if args.format not in encoders:
         print("Error: Invalid format specified. Choose from: {}".format(", ".join(valid_formats)))
