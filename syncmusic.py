@@ -28,7 +28,7 @@ def encode_ffmpeg(input_file, output_file, codec, extra_args=[]):
     return subprocess.call(cmd)
 
 def encode_ogg(input_file, output_file, bitrate=None):
-    extra_args = ["-qscale:a", "5"] if bitrate is None else ["-b:a", bitrate]
+    extra_args = ["-qscale:a", "4"] if bitrate is None else ["-b:a", bitrate]
     return encode_ffmpeg(input_file, output_file, codec="libvorbis", extra_args=extra_args)
 
 def encode_opus(input_file, output_file, bitrate=None):
