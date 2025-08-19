@@ -5,7 +5,6 @@
 # encode flac, wav as opus
 
 import argparse
-import errno
 import os
 import re
 import shutil
