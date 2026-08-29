@@ -1,0 +1,16 @@
+#!/bin/bash
+
+NO_INTRO_ROOT=/mnt/data4/Myrient/No-Intro
+GAMES_ROOT=/run/media/ljmcc/MiSTer_Data/games
+
+sync_rom_dir() {
+  local src="$NO_INTRO_ROOT/$1"
+  local dst="$GAMES_ROOT/$2"
+  echo "Syncing $src to $dst"
+  rsync -av "$src/" "$dst/"
+}
+
+sync_rom_dir "Nintendo - Nintendo Entertainment System (Headered)" "NES"
+sync_rom_dir "Nintendo - Super Nintendo Entertainment System" "SNES"
+sync_rom_dir "Sega - Master System - Mark III" "SMS"
+sync_rom_dir "Sega - Mega Drive - Genesis" "MegaDrive"
